@@ -109,10 +109,7 @@ namespace Rock.Utility
                 if ( items != null )
                 {
                     var rockContext = new Rock.Data.RockContext();
-                    foreach ( var item in items )
-                    {
-                        Rock.Attribute.Helper.LoadAttributes( item, rockContext );
-                    }
+                    Rock.Attribute.Helper.LoadAttributes( items.ToList(), rockContext );
 
                     FilterAttributes( rockContext, items, this.Person );
                 }

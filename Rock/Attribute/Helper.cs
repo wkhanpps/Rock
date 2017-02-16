@@ -312,11 +312,37 @@ namespace Rock.Attribute
         }
 
         /// <summary>
+        /// Loads the attributes.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="entities">The entities.</param>
+        /// <param name="rockContext">The rock context.</param>
+        public static void LoadAttributes<T>( IList<T> entities, RockContext rockContext ) where T: IHasAttributes
+        {
+            int entityTypeId = EntityTypeCache.Read( typeof( T ) ).Id;
+            var preloadedAttributeValues = new AttributeValueService( rockContext ).Queryable().Where( a => a.Attribute.EntityTypeId == entityTypeId ).AsNoTracking().ToList();
+            foreach(var entity in entities )
+            {
+                LoadAttributes( entity, rockContext, preloadedAttributeValues );
+            }
+        }
+
+        /// <summary>
         /// Loads the <see cref="P:IHasAttributes.Attributes" /> and <see cref="P:IHasAttributes.AttributeValues" /> of any <see cref="IHasAttributes" /> object
         /// </summary>
         /// <param name="entity">The item.</param>
         /// <param name="rockContext">The rock context.</param>
-        public static void LoadAttributes( Rock.Attribute.IHasAttributes entity, RockContext rockContext )
+        public static void LoadAttributes( Rock.Attribute.IHasAttributes entity, RockContext rockContext)
+        {
+            LoadAttributes( entity, rockContext, null );
+        }
+
+        /// <summary>
+        /// Loads the <see cref="P:IHasAttributes.Attributes" /> and <see cref="P:IHasAttributes.AttributeValues" /> of any <see cref="IHasAttributes" /> object
+        /// </summary>
+        /// <param name="entity">The item.</param>
+        /// <param name="rockContext">The rock context.</param>
+        private static void LoadAttributes( Rock.Attribute.IHasAttributes entity, RockContext rockContext, IEnumerable<AttributeValue> preloadedAttributeValues = null )
         {
             if ( entity != null )
             {
@@ -525,11 +551,21 @@ namespace Rock.Attribute
                     if ( !entityTypeCache.IsEntity || entity.Id != 0 )
                     {
                         List<int> attributeIds = allAttributes.Select( a => a.Id ).ToList();
-                        foreach ( var attributeValue in attributeValueService.Queryable().AsNoTracking()
-                            .Where( v => 
+                        List<AttributeValue> attributeValueList;
+                        if (preloadedAttributeValues != null)
+                        {
+                            attributeValueList = preloadedAttributeValues.Where( a => a.EntityId == entity.Id ).ToList();
+                        }
+                        else
+                        {
+                            attributeValueList = attributeValueService.Queryable().AsNoTracking()
+                            .Where( v =>
                                 v.EntityId.HasValue &&
                                 ( v.EntityId.Value == entity.Id || altEntityIds.Contains( v.EntityId.Value ) )
-                                && attributeIds.Contains( v.AttributeId ) ) )
+                                && attributeIds.Contains( v.AttributeId ) ).ToList();
+                        }
+
+                        foreach ( var attributeValue in attributeValueList )
                         {
                             var attributeKey = AttributeCache.Read( attributeValue.AttributeId ).Key;
                             attributeValues[attributeKey] = new AttributeValueCache( attributeValue );
