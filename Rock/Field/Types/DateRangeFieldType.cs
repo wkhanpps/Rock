@@ -15,7 +15,13 @@
 // </copyright>
 //
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Linq.Expressions;
 using System.Web.UI;
+using System.Web.UI.WebControls;
+using Rock.Model;
+using Rock.Reporting;
 using Rock.Web.UI.Controls;
 
 namespace Rock.Field.Types
@@ -26,12 +32,11 @@ namespace Rock.Field.Types
     [Serializable]
     public class DateRangeFieldType : FieldType
     {
-
         #region Formatting
 
         /// <summary>
         /// Returns the field's current value(s)
-        /// </summary> 
+        /// </summary>
         /// <param name="parentControl">The parent control.</param>
         /// <param name="value">Information about the value</param>
         /// <param name="configurationValues">The configuration values.</param>
@@ -140,17 +145,51 @@ namespace Rock.Field.Types
         #region Filter Control
 
         /// <summary>
-        /// Creates the control needed to filter (query) values using this field type.
+        /// Gets the type of the filter comparison.
+        /// </summary>
+        /// <value>
+        /// The type of the filter comparison.
+        /// </value>
+        public override ComparisonType FilterComparisonType
+        {
+            get { return ComparisonHelper.DateFilterComparisonTypes; }
+        }
+
+        /// <summary>
+        /// Gets the filter value control.
         /// </summary>
         /// <param name="configurationValues">The configuration values.</param>
         /// <param name="id">The identifier.</param>
         /// <param name="required">if set to <c>true</c> [required].</param>
         /// <param name="filterMode">The filter mode.</param>
         /// <returns></returns>
-        public override System.Web.UI.Control FilterControl( System.Collections.Generic.Dictionary<string, ConfigurationValue> configurationValues, string id, bool required, Rock.Reporting.FilterMode filterMode )
+        public override Control FilterValueControl( Dictionary<string, ConfigurationValue> configurationValues, string id, bool required, FilterMode filterMode )
         {
-            // This field type does not support filtering
-            return null;
+            var dateFiltersPanel = new Panel();
+            dateFiltersPanel.ID = string.Format( "{0}_dtFilterControls", id );
+
+            var datePickerPanel = new Panel();
+            dateFiltersPanel.Controls.Add( datePickerPanel );
+
+            //var datePicker = new DatePicker();
+            //datePicker.ID = string.Format( "{0}_dtPicker", id );
+            //datePicker.DisplayCurrentOption = true;
+            //datePickerPanel.AddCssClass( "js-filter-control" );
+            //datePickerPanel.Controls.Add( datePicker );
+
+            var dateRangePicker = new DateRangePicker();
+            dateRangePicker.ID = string.Format( "{0}_dtRangePicker", id );
+            datePickerPanel.AddCssClass( "js-filter-control" );
+            datePickerPanel.Controls.Add( dateRangePicker );
+
+            //var slidingDateRangePicker = new SlidingDateRangePicker();
+            //slidingDateRangePicker.ID = string.Format( "{0}_dtSlidingDateRange", id );
+            //slidingDateRangePicker.AddCssClass( "js-filter-control-between" );
+            //slidingDateRangePicker.Label = string.Empty;
+            //slidingDateRangePicker.PreviewLocation = SlidingDateRangePicker.DateRangePreviewLocation.Right;
+            //dateFiltersPanel.Controls.Add( slidingDateRangePicker );
+
+            return dateFiltersPanel;
         }
 
         /// <summary>
@@ -159,10 +198,248 @@ namespace Rock.Field.Types
         /// <returns></returns>
         public override bool HasFilterControl()
         {
-            return false;
+            return true;
+        }
+
+        /// <summary>
+        /// Gets the filter value value.
+        /// </summary>
+        /// <param name="control">The control.</param>
+        /// <param name="configurationValues">The configuration values.</param>
+        /// <returns></returns>
+        public override string GetFilterValueValue( Control control, Dictionary<string, ConfigurationValue> configurationValues )
+        {
+            var dateFiltersPanel = control as Panel;
+            var datePicker = dateFiltersPanel.ControlsOfTypeRecursive<DatePicker>().FirstOrDefault();
+            var dateRangePicker = dateFiltersPanel.ControlsOfTypeRecursive<DateRangePicker>().FirstOrDefault();
+            var slidingDateRangePicker = dateFiltersPanel.ControlsOfTypeRecursive<SlidingDateRangePicker>().FirstOrDefault();
+            string datePickerValue = string.Empty;
+            string dateRangePickerValue = string.Empty;
+            string slidingDateRangePickerValue = string.Empty;
+            if ( datePicker != null )
+            {
+                datePickerValue = this.GetEditValue( datePicker, configurationValues );
+            }
+
+            if ( dateRangePicker != null )
+            {
+                dateRangePickerValue = this.GetEditValue( dateRangePicker, configurationValues );
+            }
+
+            if ( slidingDateRangePicker != null )
+            {
+                slidingDateRangePickerValue = slidingDateRangePicker.DelimitedValues;
+            }
+
+            // use comma delimited
+            return string.Format( "{0},{1}", datePickerValue, slidingDateRangePickerValue );
+        }
+
+        /// <summary>
+        /// Sets the filter value value.
+        /// </summary>
+        /// <param name="control">The control.</param>
+        /// <param name="configurationValues">The configuration values.</param>
+        /// <param name="value">The value.</param>
+        public override void SetFilterValueValue( Control control, Dictionary<string, ConfigurationValue> configurationValues, string value )
+        {
+            var filterValues = value.Split( new string[] { "," }, StringSplitOptions.None );
+
+            var dateFiltersPanel = control as Panel;
+            var datePicker = dateFiltersPanel.ControlsOfTypeRecursive<DatePicker>().FirstOrDefault();
+            if ( datePicker != null && filterValues.Length > 0 )
+            {
+                this.SetEditValue( datePicker, configurationValues, filterValues[0] );
+            }
+
+            var dateRangePicker = dateFiltersPanel.ControlsOfTypeRecursive<DateRangePicker>().FirstOrDefault();
+            if ( dateRangePicker != null && filterValues.Length > 0 )
+            {
+                this.SetEditValue( dateRangePicker, configurationValues, filterValues[0] );
+            }
+
+            var slidingDateRangePicker = dateFiltersPanel.ControlsOfTypeRecursive<SlidingDateRangePicker>().FirstOrDefault();
+            if ( slidingDateRangePicker != null && filterValues.Length > 1 )
+            {
+                slidingDateRangePicker.DelimitedValues = filterValues[1];
+            }
+        }
+
+        /// <summary>
+        /// Gets the filter format script.
+        /// </summary>
+        /// <param name="configurationValues">The configuration values.</param>
+        /// <param name="title">The title.</param>
+        /// <returns></returns>
+        /// <remarks>
+        /// This script must set a javascript variable named 'result' to a friendly string indicating value of filter controls
+        /// a '$selectedContent' should be used to limit script to currently selected filter fields
+        /// </remarks>
+        public override string GetFilterFormatScript( Dictionary<string, ConfigurationValue> configurationValues, string title )
+        {
+            string titleJs = System.Web.HttpUtility.JavaScriptStringEncode( title );
+            var format = "return Rock.reporting.formatFilterForDateField('{0}', $selectedContent);";
+            return string.Format( format, titleJs );
+        }
+
+        /// <summary>
+        /// Formats the filter values.
+        /// </summary>
+        /// <param name="configurationValues">The configuration values.</param>
+        /// <param name="filterValues">The filter values.</param>
+        /// <returns></returns>
+        public override string FormatFilterValues( Dictionary<string, ConfigurationValue> configurationValues, List<string> filterValues )
+        {
+            if ( filterValues.Count >= 2 )
+            {
+                var filterValueValues = filterValues[1].Split( new string[] { "," }, StringSplitOptions.None );
+
+                string comparisonValue = filterValues[0];
+                if ( comparisonValue != "0" )
+                {
+                    ComparisonType comparisonType = comparisonValue.ConvertToEnum<ComparisonType>( ComparisonType.EqualTo );
+                    if ( comparisonType == ComparisonType.Between && filterValueValues.Length > 1 )
+                    {
+                        var dateRangeText = SlidingDateRangePicker.FormatDelimitedValues( filterValueValues[1] );
+                        return string.Format( "through '{0}'", dateRangeText );
+                    }
+                    else
+                    {
+                        List<string> filterValuesForFormat = new List<string>();
+                        filterValuesForFormat.Add( filterValues[0] );
+                        filterValuesForFormat.Add( filterValueValues[0] );
+                        return base.FormatFilterValues( configurationValues, filterValuesForFormat );
+                    }
+                }
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Gets a filter expression for an entity property value.
+        /// </summary>
+        /// <param name="configurationValues">The configuration values.</param>
+        /// <param name="filterValues">The filter values.</param>
+        /// <param name="parameterExpression">The parameter expression.</param>
+        /// <param name="propertyName">Name of the property.</param>
+        /// <param name="propertyType">Type of the property.</param>
+        /// <returns></returns>
+        public override Expression PropertyFilterExpression( Dictionary<string, ConfigurationValue> configurationValues, List<string> filterValues, Expression parameterExpression, string propertyName, Type propertyType )
+        {
+            if ( filterValues.Count >= 2 )
+            {
+                // uses Tab Delimited since slidingDateRangePicker is | delimited
+                var filterValueValues = filterValues[1].Split( new string[] { "," }, StringSplitOptions.None );
+
+                // Parse for RelativeValue of DateTime (if specified)
+                filterValueValues[0] = ParseRelativeValue( filterValueValues[0] );
+
+                string comparisonValue = filterValues[0];
+                if ( comparisonValue != "0" )
+                {
+                    ComparisonType comparisonType = comparisonValue.ConvertToEnum<ComparisonType>( ComparisonType.EqualTo );
+                    MemberExpression propertyExpression = Expression.Property( parameterExpression, propertyName );
+                    if ( comparisonType == ComparisonType.Between && filterValueValues.Length > 1 )
+                    {
+                        var dateRange = SlidingDateRangePicker.CalculateDateRangeFromDelimitedValues( filterValueValues[1] );
+                        ConstantExpression constantExpressionLower = dateRange.Start.HasValue
+                            ? Expression.Constant( dateRange.Start, typeof( DateTime ) )
+                            : Expression.Constant( null );
+
+                        ConstantExpression constantExpressionUpper = dateRange.End.HasValue
+                            ? Expression.Constant( dateRange.End, typeof( DateTime ) )
+                            : Expression.Constant( null );
+
+                        return ComparisonHelper.ComparisonExpression( comparisonType, propertyExpression, constantExpressionLower, constantExpressionUpper );
+                    }
+                    else
+                    {
+                        var dateTime = filterValueValues[0].AsDateTime() ?? DateTime.MinValue;
+                        ConstantExpression constantExpression = Expression.Constant( dateTime, typeof( DateTime ) );
+                        return ComparisonHelper.ComparisonExpression( comparisonType, propertyExpression, constantExpression );
+                    }
+                }
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Gets a filter expression for an attribute value.
+        /// </summary>
+        /// <param name="configurationValues">The configuration values.</param>
+        /// <param name="filterValues">The filter values.</param>
+        /// <param name="parameterExpression">The parameter expression.</param>
+        /// <returns></returns>
+        public override Expression AttributeFilterExpression( Dictionary<string, ConfigurationValue> configurationValues, List<string> filterValues, ParameterExpression parameterExpression )
+        {
+            return PropertyFilterExpression( configurationValues, filterValues, parameterExpression, "ValueAsDateTime", typeof( DateTime? ) );
+        }
+
+        /// <summary>
+        /// Gets the name of the attribute value field that should be bound to (Value, ValueAsDateTime, ValueAsBoolean, or ValueAsNumeric)
+        /// </summary>
+        /// <value>
+        /// The name of the attribute value field.
+        /// </value>
+        public override string AttributeValueFieldName
+        {
+            get
+            {
+                return "ValueAsDateTime";
+            }
+        }
+
+        /// <summary>
+        /// Attributes the constant expression.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <returns></returns>
+        public override ConstantExpression AttributeConstantExpression( string value )
+        {
+            var dateTime = value.AsDateTime() ?? DateTime.MinValue;
+            return Expression.Constant( dateTime, typeof( DateTime ) );
+        }
+
+        /// <summary>
+        /// Gets the type of the attribute value field.
+        /// </summary>
+        /// <value>
+        /// The type of the attribute value field.
+        /// </value>
+        public override Type AttributeValueFieldType
+        {
+            get
+            {
+                return typeof( DateTime? );
+            }
+        }
+
+        /// <summary>
+        /// Checks to see if value is for 'current' date and if so, adjusts the date value.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <returns></returns>
+        public virtual string ParseRelativeValue( string value )
+        {
+            if ( value.StartsWith( "CURRENT", StringComparison.OrdinalIgnoreCase ) )
+            {
+                DateTime currentDate = RockDateTime.Today;
+
+                var valueParts = value.Split( ',' );
+
+                if ( valueParts.Length > 1 )
+                {
+                    currentDate = currentDate.AddDays( valueParts[1].AsInteger() );
+                }
+
+                return currentDate.ToString( "o" );
+            }
+
+            return value;
         }
 
         #endregion
-
     }
 }
