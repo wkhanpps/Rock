@@ -273,7 +273,8 @@ namespace Rock.Web.UI.Controls
                 writer.RenderBeginTag( HtmlTextWriterTag.Tfoot );
                 writer.RenderBeginTag( HtmlTextWriterTag.Tr );
 
-                writer.AddAttribute( HtmlTextWriterAttribute.Colspan, "8" );
+                writer.AddAttribute( HtmlTextWriterAttribute.Colspan, "9" );
+                writer.AddAttribute( HtmlTextWriterAttribute.Class, "text-right" );
                 writer.RenderBeginTag( HtmlTextWriterTag.Td );
                 writer.RenderEndTag();
 
