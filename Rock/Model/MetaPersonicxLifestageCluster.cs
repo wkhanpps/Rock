@@ -17,7 +17,7 @@ namespace Rock.Model
     [RockDomain( "Meta" )]
     [Table( "MetaPersonicxLifestageCluster" )]
     [DataContract]
-    public class MetaPersonicxLifestageCluster
+    public class MetaPersonicxLifestageCluster:Model<MetaPersonicxLifestageCluster>
     {
         #region Entity Properties
 

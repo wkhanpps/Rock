@@ -74,7 +74,7 @@ namespace Rock.Model
     /// <summary>
     /// MetaNickNameLookup Configuration class.
     /// </summary>
-    public partial class MetaNickNameLookupConfiguration : EntityTypeConfiguration<EventItemOccurrenceGroupMap>
+    public partial class MetaNickNameLookupConfiguration : EntityTypeConfiguration<MetaNickNameLookup>
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="MetaNickNameLookupConfiguration" /> class.
