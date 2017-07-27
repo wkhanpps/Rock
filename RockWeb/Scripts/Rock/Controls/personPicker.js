@@ -70,31 +70,43 @@
                 });
             });
 
+            var debouncerTimeout;
+
             // debouncing function from John Hann
             // http://unscriptable.com/index.php/2009/03/20/debouncing-javascript-methods/
             var debouncePersonPicker = function (func, threshold, execAsap)
             {
-              var timeout;
-
               return function debounced()
               {
                 var obj = this, args = arguments;
+                var e = args[0];
+                if (e.type == 'click') {
+                  execAsap = true;
+                } else {
+                  execAsap = false;
+                }
+
                 function delayed()
                 {
                   if (!execAsap)
                     func.apply(obj, args);
-                  timeout = null;
+                  debouncerTimeout = null;
                 };
 
-                if (timeout) {
-                  clearTimeout(timeout);
+                if (debouncerTimeout) {
+                  clearTimeout(debouncerTimeout);
                 }
-                else if (execAsap)
-                  func.apply(obj, args);
 
-                timeout = setTimeout(delayed, threshold || 250);
+                if (execAsap) {
+                  func.apply(obj, args);
+                }
+
+                debouncerTimeout = setTimeout(delayed, threshold || 1250);
               };
             }
+
+            // if the mouse leaves the picker item, do the debounce with an empty function to cancel the mouseenter function
+            $('#' + controlId + ' .picker-select').on('mouseleave', '.picker-select-item', debouncePersonPicker(function (e) { }));
 
             $('#' + controlId + ' .picker-select').on('click mouseenter', '.picker-select-item', debouncePersonPicker(function (e)
             {
@@ -120,6 +132,24 @@
                     }
                 }
 
+                // hide other open details
+                $('#' + controlId + ' .picker-select-item-details').filter(':visible').each(function ()
+                {
+                  var $el = $(this),
+                     currentPersonId = $el.closest('.picker-select-item').attr('data-person-id');
+
+                  if (currentPersonId != selectedPersonId) {
+
+                    // The selected details slides up in a weird way if we try to hide details that are open above it, set this to false to see
+                    var onlyHideBelowItems = true;
+
+                    if (!onlyHideBelowItems || ($el.offset().top > $selectedItem.offset().top)) {
+                      $el.hide();
+                      exports.personPickers[controlId].updateScrollbar();
+                    }
+                  }
+                });
+
                 lastSelectedPersonId = selectedPersonId;
 
                 if ($itemDetails.attr('data-has-details') == 'false') {
@@ -133,18 +163,22 @@
 
                         // hide then set the html so that we can get the slideDown effect
                         $itemDetails.stop().hide().html(responseText);
-                        $itemDetails.slideDown(function () {
-                            exports.personPickers[controlId].updateScrollbar();
-                        });
+                        showItemDetails($itemDetails);
 
                         $spinner.stop().fadeOut(200);
                     });
                 } else {
-                    $selectedItem.find('.picker-select-item-details:hidden').slideDown(function () {
-                        exports.personPickers[controlId].updateScrollbar();
-                    });
+                  showItemDetails($selectedItem.find('.picker-select-item-details:hidden'));
                 }
             }));
+
+            var showItemDetails = function ($itemDetails)
+            {
+              $itemDetails.slideDown(function ()
+              {
+                exports.personPickers[controlId].updateScrollbar();
+              });
+            }
 
             $('#' + controlId).hover(
                 function () {
@@ -235,7 +269,7 @@
 
                         var inactiveWarning = "";
 
-                        if (!item.IsActive) {
+                        if (!item.IsActive && item.RecordStatus) {
                             inactiveWarning = " <small>(" + item.RecordStatus + ")</small>";
                         }
 
