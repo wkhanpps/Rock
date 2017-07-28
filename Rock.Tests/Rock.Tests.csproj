@@ -60,6 +60,7 @@
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Runtime.Caching" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -107,6 +108,10 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Rock.Migrations\Rock.Migrations.csproj">
+      <Project>{704740d8-b539-4560-9f8c-681670c9d6ad}</Project>
+      <Name>Rock.Migrations</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Rock\Rock.csproj">
       <Project>{185A31D7-3037-4DAE-8797-0459849A84BD}</Project>
       <Name>Rock</Name>
@@ -140,6 +145,7 @@
     </Content>
     <Content Include="SqlServerTypes\readme.htm" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
