@@ -7,7 +7,8 @@ namespace Rock.Tests.Rock.Model
 {
     public class PersonTests
     {
-        [Fact( Skip = "Need a mock for Global Attributes" )]
+        //[Fact( Skip = "Need a mock for Global Attributes" )]
+        [Fact]
         public void OffsetGraduatesToday()
         {
             InitGlobalAttributesCache();
