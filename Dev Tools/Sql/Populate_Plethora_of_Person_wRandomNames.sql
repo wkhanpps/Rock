@@ -7,10 +7,10 @@ DECLARE @i INT
         FROM DefinedValue
         WHERE guid = '36CF10D6-C695-413D-8E7C-4546EFEF385E'
         )
-    ,@recordStatusDefinedTypeId INT = (
+    ,@activeRecordStatus INT = (
         SELECT id
-        FROM DefinedType
-        WHERE guid = '8522BADD-2871-45A5-81DD-C76DA07E2E7E'
+        FROM DefinedValue
+        WHERE guid = '618F906C-C33D-4FA3-8AEF-E58CB7B63F1E'
         )
     ,@homePhone INT = (
         SELECT id
@@ -27,11 +27,6 @@ DECLARE @i INT
         FROM DefinedValue
         WHERE guid = 'F19FC180-FE8F-4B72-A59C-8013E3B0EB0D'
         )
-    ,@connectionStatusDefinedTypeId INT = (
-        SELECT id
-        FROM DefinedType
-        WHERE guid = '2E6540EA-63F0-40FE-BE50-F2A84735E600'
-    )
     ,@personId INT
     ,@personGuid UNIQUEIDENTIFIER
     ,@spousePersonId INT
@@ -12000,9 +11995,6 @@ BEGIN
             FROM #lastNames
             );
 
-    DECLARE @connectionStatusValueId INT;
-    DECLARE @recordStatusValueId INT;
-
     WHILE @personCounter < @maxPerson
     BEGIN
         -- get a random firstname
@@ -12059,7 +12051,7 @@ BEGIN
             ,0
             ,@personGuid
             ,@personRecordType
-            ,@recordStatusValueId
+            ,@activeRecordStatus
 			,0
             ,SYSDATETIME()
             )
@@ -12119,9 +12111,6 @@ BEGIN
         SET @day = CONVERT(NVARCHAR(100), ROUND(rand() * 26, 0) + 1);
         SET @spousePersonGuid = NEWID();
 
-        SET @connectionStatusValueId = (select top 1 id from DefinedValue where DefinedTypeId = @connectionStatusDefinedTypeId order by NEWID())
-        SET @recordStatusValueId = (select top 1 id from DefinedValue where DefinedTypeId = @recordStatusDefinedTypeId order by NEWID())
-
         INSERT INTO [Person] (
             [IsSystem]
             ,[FirstName]
@@ -12138,7 +12127,6 @@ BEGIN
             ,[Guid]
             ,[RecordTypeValueId]
             ,[RecordStatusValueId]
-            ,[ConnectionStatusValueId]
 			,[IsDeceased]
             ,[CreatedDateTime]
             )
@@ -12157,8 +12145,7 @@ BEGIN
             ,0
             ,@spousePersonGuid
             ,@personRecordType
-            ,@recordStatusValueId
-            ,@connectionStatusValueId
+            ,@activeRecordStatus
 			,0
             ,SYSDATETIME()
             )
@@ -12284,7 +12271,6 @@ BEGIN
 				,[Guid]
 				,[RecordTypeValueId]
 				,[RecordStatusValueId]
-                ,[ConnectionStatusValueId]
 				,[IsDeceased]
 				,[CreatedDateTime]
 				,[GivingGroupId]
@@ -12304,8 +12290,7 @@ BEGIN
 				,0
 				,@kidPersonGuid
 				,@personRecordType
-				,@recordStatusValueId
-                ,@connectionStatusValueId
+				,@activeRecordStatus
 				,0
 				,SYSDATETIME()
 				,@groupId

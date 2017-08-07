@@ -63,17 +63,8 @@ namespace RockWeb.Blocks.Core
         {
             base.OnInit(e);
 
-            IEntity contextEntity;
-            if ( ContextTypesRequired.Count == 1 )
-            {
-                contextEntity = this.ContextEntity( ContextTypesRequired.First().Name );
-            }
-            else
-            {
-                contextEntity = this.ContextEntity();
-            }
-
-            if ( contextEntity != null )
+            var contextEntity = this.ContextEntity();
+            if (contextEntity != null)
             {
                 upNotes.Visible = true;
 

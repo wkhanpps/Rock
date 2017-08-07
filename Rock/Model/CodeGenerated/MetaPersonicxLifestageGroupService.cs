@@ -57,12 +57,6 @@ namespace Rock.Model
                 errorMessage = string.Format( "This {0} is assigned to a {1}.", MetaPersonicxLifestageGroup.FriendlyTypeName, MetaPersonicxLifestageCluster.FriendlyTypeName );
                 return false;
             }  
- 
-            if ( new Service<Person>( Context ).Queryable().Any( a => a.MetaPersonicxLifestageGroupId == item.Id ) )
-            {
-                errorMessage = string.Format( "This {0} is assigned to a {1}.", MetaPersonicxLifestageGroup.FriendlyTypeName, Person.FriendlyTypeName );
-                return false;
-            }  
             return true;
         }
     }

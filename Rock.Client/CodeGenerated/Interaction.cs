@@ -67,9 +67,6 @@ namespace Rock.Client
         public string Operation { get; set; }
 
         /// <summary />
-        public int? PersonalDeviceId { get; set; }
-
-        /// <summary />
         public int? PersonAliasId { get; set; }
 
         /// <summary>
@@ -115,7 +112,6 @@ namespace Rock.Client
             this.InteractionSummary = source.InteractionSummary;
             this.ModifiedAuditValuesAlreadyUpdated = source.ModifiedAuditValuesAlreadyUpdated;
             this.Operation = source.Operation;
-            this.PersonalDeviceId = source.PersonalDeviceId;
             this.PersonAliasId = source.PersonAliasId;
             this.CreatedDateTime = source.CreatedDateTime;
             this.ModifiedDateTime = source.ModifiedDateTime;

@@ -51,12 +51,6 @@ namespace Rock.Model
         public bool CanDelete( PersonalDevice item, out string errorMessage )
         {
             errorMessage = string.Empty;
- 
-            if ( new Service<Interaction>( Context ).Queryable().Any( a => a.PersonalDeviceId == item.Id ) )
-            {
-                errorMessage = string.Format( "This {0} is assigned to a {1}.", PersonalDevice.FriendlyTypeName, Interaction.FriendlyTypeName );
-                return false;
-            }  
             return true;
         }
     }
@@ -95,15 +89,11 @@ namespace Rock.Model
         {
             target.Id = source.Id;
             target.DeviceRegistrationId = source.DeviceRegistrationId;
-            target.DeviceUniqueIdentifier = source.DeviceUniqueIdentifier;
-            target.DeviceVersion = source.DeviceVersion;
             target.ForeignGuid = source.ForeignGuid;
             target.ForeignKey = source.ForeignKey;
-            target.MACAddress = source.MACAddress;
             target.NotificationsEnabled = source.NotificationsEnabled;
-            target.PersonalDeviceTypeValueId = source.PersonalDeviceTypeValueId;
+            target.PersonalDeviceTypeId = source.PersonalDeviceTypeId;
             target.PersonAliasId = source.PersonAliasId;
-            target.PlatformValueId = source.PlatformValueId;
             target.CreatedDateTime = source.CreatedDateTime;
             target.ModifiedDateTime = source.ModifiedDateTime;
             target.CreatedByPersonAliasId = source.CreatedByPersonAliasId;

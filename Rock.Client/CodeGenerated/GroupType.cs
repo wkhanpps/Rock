@@ -127,9 +127,6 @@ namespace Rock.Client
         public bool ShowInNavigation { get; set; }
 
         /// <summary />
-        public bool ShowMaritalStatus { get; set; }
-
-        /// <summary />
         public bool TakesAttendance { get; set; }
 
         /// <summary>
@@ -195,7 +192,6 @@ namespace Rock.Client
             this.ShowConnectionStatus = source.ShowConnectionStatus;
             this.ShowInGroupList = source.ShowInGroupList;
             this.ShowInNavigation = source.ShowInNavigation;
-            this.ShowMaritalStatus = source.ShowMaritalStatus;
             this.TakesAttendance = source.TakesAttendance;
             this.CreatedDateTime = source.CreatedDateTime;
             this.ModifiedDateTime = source.ModifiedDateTime;

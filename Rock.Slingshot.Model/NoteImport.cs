@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Rock.Slingshot.Model
+﻿namespace Rock.Slingshot.Model
 {
     /// <summary>
     /// 
@@ -62,21 +60,8 @@ namespace Rock.Slingshot.Model
         /// Gets or sets the text/body of the note.
         /// </summary>
         /// <value>
-        /// A <see cref="System.String" /> representing the text/body of the note.
+        /// A <see cref="System.String"/> representing the text/body of the note.
         /// </value>
         public string Text { get; set; }
-
-        /// <summary>
-        /// The date time that the note was created or last modified
-        /// </summary>
-        public DateTime? DateTime { get; set; }
-
-        /// <summary>
-        /// The ForeignId of the Person that created the note
-        /// </summary>
-        /// <value>
-        /// The created by person identifier.
-        /// </value>
-        public int? CreatedByPersonForeignId { get; set; }
     }
 }

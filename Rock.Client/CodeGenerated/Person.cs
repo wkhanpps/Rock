@@ -105,12 +105,6 @@ namespace Rock.Client
         public int? MaritalStatusValueId { get; set; }
 
         /// <summary />
-        public int? MetaPersonicxLifestageClusterId { get; set; }
-
-        /// <summary />
-        public int? MetaPersonicxLifestageGroupId { get; set; }
-
-        /// <summary />
         public string MiddleName { get; set; }
 
         /// <summary>
@@ -208,8 +202,6 @@ namespace Rock.Client
             this.IsSystem = source.IsSystem;
             this.LastName = source.LastName;
             this.MaritalStatusValueId = source.MaritalStatusValueId;
-            this.MetaPersonicxLifestageClusterId = source.MetaPersonicxLifestageClusterId;
-            this.MetaPersonicxLifestageGroupId = source.MetaPersonicxLifestageGroupId;
             this.MiddleName = source.MiddleName;
             this.ModifiedAuditValuesAlreadyUpdated = source.ModifiedAuditValuesAlreadyUpdated;
             this.NickName = source.NickName;
@@ -256,12 +248,6 @@ namespace Rock.Client
 
         /// <summary />
         public DefinedValue MaritalStatusValue { get; set; }
-
-        /// <summary />
-        public MetaPersonicxLifestageCluster MetaPersonicxLifestageCluster { get; set; }
-
-        /// <summary />
-        public MetaPersonicxLifestageGroup MetaPersonicxLifestageGroup { get; set; }
 
         /// <summary />
         public ICollection<PhoneNumber> PhoneNumbers { get; set; }

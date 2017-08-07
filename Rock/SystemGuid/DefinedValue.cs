@@ -421,21 +421,10 @@ namespace Rock.SystemGuid
         #endregion
 
         #region Personal Device Type
-
         /// <summary>
         /// Personal device types for notifications
         /// </summary>
         public const string PERSONAL_DEVICE_TYPE_MOBILE = "5A8F264F-3BE6-4F15-912A-3CE93A98E8F6";
-
-        #endregion
-
-        #region Personal Device Platform
-
-        /// <summary>
-        /// A default personal device platform
-        /// </summary>
-        public const string PERSONAL_DEVICE_PLATFORM_OTHER = "13091A2D-C483-46FA-B489-E5D230B353C8";
-
         #endregion
 
         #region Map Styles
@@ -493,7 +482,6 @@ namespace Rock.SystemGuid
         #endregion
 
         #region Interactions
-
         /// <summary>
         /// Interaction Channel Type: Website
         /// </summary>
@@ -513,12 +501,6 @@ namespace Rock.SystemGuid
         /// Interaction Channel Type: Content Channel
         /// </summary>
         public const string INTERACTIONCHANNELTYPE_CONTENTCHANNEL = "F1A19D09-E010-EEB3-465A-940A6F023CEB";
-
-        /// <summary>
-        /// Interaction Channel Type: Content Channel
-        /// </summary>
-        public const string INTERACTIONCHANNELTYPE_WIFI_PRESENCE = "338CB800-C556-46CD-849D-8AE58FC7CB0E";
-
         #endregion
 
     }

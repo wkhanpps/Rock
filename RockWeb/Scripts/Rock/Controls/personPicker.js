@@ -235,7 +235,7 @@
 
                         var inactiveWarning = "";
 
-                        if (!item.IsActive && item.RecordStatus) {
+                        if (!item.IsActive) {
                             inactiveWarning = " <small>(" + item.RecordStatus + ")</small>";
                         }
 
