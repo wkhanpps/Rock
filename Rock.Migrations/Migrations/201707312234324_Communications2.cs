@@ -418,15 +418,6 @@ VALUES(0,'Under 35','A filter to help refine a communications recipient list to 
 END
 " );
 
-            // Add CommunicationPreferenceId to Person, and CommunicationTemplateId to Communication
-            AddColumn( "dbo.Person", "CommunicationPreference", c => c.Int() );
-            AddColumn( "dbo.Communication", "CommunicationTemplateId", c => c.Int() );
-            CreateIndex( "dbo.Communication", "CommunicationTemplateId" );
-
-            // AddForeignKey("dbo.Communication", "CommunicationTemplateId", "dbo.CommunicationTemplate", "Id");
-            // Instead of AddForeignKey, do it manually so it can be a ON DELETE SET NULL
-            Sql( @"ALTER TABLE dbo.Communication ADD CONSTRAINT [FK_dbo.Communication_dbo.CommunicationTemplate_CommunicationTemplateId] 
-                    FOREIGN KEY (CommunicationTemplateId) REFERENCES dbo.CommunicationTemplate (Id) ON DELETE SET NULL" );
         }
 
         /// <summary>
@@ -434,11 +425,6 @@ END
         /// </summary>
         public override void Down()
         {
-            DropForeignKey( "dbo.Communication", "CommunicationTemplateId", "dbo.CommunicationTemplate" );
-            DropIndex( "dbo.Communication", new[] { "CommunicationTemplateId" } );
-            DropColumn( "dbo.Communication", "CommunicationTemplateId" );
-            DropColumn( "dbo.Person", "CommunicationPreference" );
-
             RockMigrationHelper.DeleteGroupTypeRole( "9D85AB4E-59BC-B48A-494A-5684BA41578E" );
             RockMigrationHelper.DeleteGroupType( "D1D95777-FFA3-CBB3-4A6D-658706DAED33" );
             RockMigrationHelper.DeleteAttribute( "E3810936-182E-2585-4F8E-030A0E18B27A" );
