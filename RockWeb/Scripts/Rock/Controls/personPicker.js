@@ -101,12 +101,17 @@
                   func.apply(obj, args);
                 }
 
-                debouncerTimeout = setTimeout(delayed, threshold || 1250);
+                debouncerTimeout = setTimeout(delayed, threshold || 500);
               };
             }
 
-            // if the mouse leaves the picker item, do the debounce with an empty function to cancel the mouseenter function
-            $('#' + controlId + ' .picker-select').on('mouseleave', '.picker-select-item', debouncePersonPicker(function (e) { }));
+            // if the mouse leaves the picker item, clear the debouncer so that isn't show/hide any stuff in the queue
+            $('#' + controlId + ' .picker-select').on('mouseleave', '.picker-select-item', function (e)
+            {
+              if (debouncerTimeout) {
+                clearTimeout(debouncerTimeout);
+              }
+            });
 
             $('#' + controlId + ' .picker-select').on('click mouseenter', '.picker-select-item', debouncePersonPicker(function (e)
             {
