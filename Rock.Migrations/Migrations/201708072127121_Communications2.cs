@@ -419,7 +419,9 @@ END
 " );
 
             // Add CommunicationPreferenceId to Person, and CommunicationTemplateId to Communication
-            AddColumn( "dbo.Person", "CommunicationPreference", c => c.Int() );
+            AddColumn( "dbo.Person", "CommunicationPreference", c => c.Int( nullable:false ) );
+            Sql( $"UPDATE [Person] SET [CommunicationPreference] = {( int ) Rock.Model.CommunicationType.Email}" );
+
             AddColumn( "dbo.Communication", "CommunicationTemplateId", c => c.Int() );
             CreateIndex( "dbo.Communication", "CommunicationTemplateId" );
 
