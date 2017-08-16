@@ -771,11 +771,15 @@ function(item) {
 
             // Collection of async queries to run before assembling date
             var qryTasks = new List<Task>();
+            var taskInfos = new List<TaskInfo>();
 
             // Get the chart data
             var transactionInfoList = new List<TransactionInfo>();
             qryTasks.Add( Task.Run( () =>
             {
+                var ti = new TaskInfo { name = "Get the chart data", start = DateTime.Now };
+                taskInfos.Add( ti );
+
                 transactionInfoList = new List<TransactionInfo>();
 
                 var ds = FinancialTransactionDetailService.GetGivingAnalyticsTransactionData(
@@ -861,6 +865,9 @@ function(item) {
                         transactionInfoList.Add( chartData );
                     }
                 }
+
+                ti.end = DateTime.Now;
+
             } ) );
 
             // If min or max amount values were entered, need to get summary so we know who gave within that range
@@ -869,6 +876,9 @@ function(item) {
             {
                 qryTasks.Add( Task.Run( () =>
                 {
+                    var ti = new TaskInfo { name = "Get Summary", start = DateTime.Now };
+                    taskInfos.Add( ti );
+
                     idsWithValidTotals = new List<string>();
 
                     var dtPersonSummary = FinancialTransactionDetailService.GetGivingAnalyticsPersonSummary(
@@ -887,6 +897,9 @@ function(item) {
                             idsWithValidTotals.Add( row["GivingId"].ToString() );
                         }
                     }
+
+                    ti.end = DateTime.Now;
+
                 } ) );
 
             }
@@ -898,6 +911,9 @@ function(item) {
             {
                 qryTasks.Add( Task.Run( () =>
                 {
+                    var ti = new TaskInfo { name = "Get DataView People", start = DateTime.Now };
+                    taskInfos.Add( ti );
+
                     dataViewGivingIds = new List<string>();
                     var dataView = new DataViewService( _rockContext ).Get( dataViewId.Value );
                     if ( dataView != null )
@@ -914,6 +930,9 @@ function(item) {
                             .Select( p => p.GivingId );
                         dataViewGivingIds = dataViewPersonIdQry.ToList();
                     }
+
+                    ti.end = DateTime.Now;
+
                 } ) );
             }
 
@@ -1699,10 +1718,18 @@ function(item) {
         public string name { get; set; }
         public DateTime start { get; set; }
         public DateTime end { get; set; }
-        public TimeSpan duration {  get
+        public TimeSpan duration
+        {
+            get
             {
                 return end.Subtract( start );
-            } }
+            }
+        }
+
+        public override string ToString()
+        {
+            return string.Format( "{0}: {1:c}", name, duration );
+        }
     }
 
     public class PersonInfo
