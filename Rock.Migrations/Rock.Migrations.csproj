@@ -305,6 +305,10 @@
     <Compile Include="Migrations\201708221709045_Communications2c.Designer.cs">
       <DependentUpon>201708221709045_Communications2c.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\201708232210021_Communications2d.cs" />
+    <Compile Include="Migrations\201708232210021_Communications2d.Designer.cs">
+      <DependentUpon>201708232210021_Communications2d.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\RockMigrationSQL.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -2683,6 +2687,9 @@
     <EmbeddedResource Include="Migrations\201708221709045_Communications2c.resx">
       <DependentUpon>201708221709045_Communications2c.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201708232210021_Communications2d.resx">
+      <DependentUpon>201708232210021_Communications2d.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Migrations\Version 6.0\Version 1.6.0\201609282147388_WaitList.resx">
       <DependentUpon>201609282147388_WaitList.cs</DependentUpon>
     </EmbeddedResource>
@@ -4455,6 +4462,7 @@
     <Content Include="Migrations\201707182207536_AttendanceAnalyticsScheduleFilter_Attendees.sql">
       <DependentUpon>201707182207536_PageShortLinks.cs</DependentUpon>
     </Content>
+    <Content Include="Migrations\201708232210021_Communications2_AddCommunicationTemplates.sql" />
     <Content Include="Migrations\Version 6.0\Version 1.6.0\201608171937068_GivingAnalyticsAccounts_AccountTotals.sql" />
     <Content Include="Migrations\Version 6.0\Version 1.6.0\201608171937068_GivingAnalyticsAccounts_FirstLastEverDates.sql" />
     <Content Include="Migrations\Version 6.0\Version 1.6.0\201608171937068_GivingAnalyticsAccounts_PersonSummary.sql" />

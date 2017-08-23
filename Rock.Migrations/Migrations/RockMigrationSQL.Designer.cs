@@ -2993,5 +2993,38 @@ namespace Rock.Migrations.Migrations {
                 return ResourceManager.GetString("_201707182207536_AttendanceAnalyticsScheduleFilter_Attendees", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to /* Create the System &apos;Blank&apos; communication template */
+        ///DELETE
+        ///FROM CommunicationTemplate
+        ///WHERE [Guid] = &apos;A3C7F623-7F6F-4C48-B66F-CBEE2DF30B6A&apos;
+        ///
+        ///INSERT INTO [dbo].[CommunicationTemplate] (
+        ///	[Name]
+        ///	,[Description]
+        ///	,[IsSystem]
+        ///	,[Subject]
+        ///	,[MediumDataJson]
+        ///	,[Guid]
+        ///	,[Message]
+        ///	)
+        ///VALUES (
+        ///	&apos;Blank&apos;
+        ///	,&apos;A template without predefined content that can be used to create email and SMS communications&apos;
+        ///	,1
+        ///	,&apos;&apos;
+        ///	,&apos;{}&apos;
+        ///	,&apos;A3C7F623-7F6F-4C48-B66F-CBEE2DF30B6A&apos;
+        ///	,
+        ///	&apos;&lt;html&gt;
+        ///&lt;head&gt;
+        ///&lt;title&gt;A Respons [rest of string was truncated]&quot;;.
+        /// </summary>
+        public static string _201708232210021_Communications2_AddCommunicationTemplates {
+            get {
+                return ResourceManager.GetString("_201708232210021_Communications2_AddCommunicationTemplates", resourceCulture);
+            }
+        }
     }
 }

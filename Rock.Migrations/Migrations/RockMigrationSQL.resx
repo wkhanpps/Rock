@@ -493,4 +493,7 @@
   <data name="_201707182207536_AttendanceAnalyticsScheduleFilter_Attendees" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>201707182207536_attendanceanalyticsschedulefilter_attendees.sql;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
   </data>
+  <data name="_201708232210021_Communications2_AddCommunicationTemplates" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>201708232210021_communications2_addcommunicationtemplates.sql;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
+  </data>
 </root>
