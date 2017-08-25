@@ -19,7 +19,6 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data.Entity;
 using System.Linq;
-using System.Text;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 using Humanizer;
@@ -55,7 +54,6 @@ namespace RockWeb.Blocks.Groups
     [BooleanField( "Show Copy Button", "Copies the group and all of its associated authorization rules", false, "", 10 )]
     [LinkedPage( "Group List Page", "The page to display related Group List.", false, "", "", 11 )]
     [LinkedPage( "Fundraising Progress Page", "The page to display fundraising progress for all its members.", false, "", "", 12 )]
-
     public partial class GroupDetail : RockBlock, IDetailBlock
     {
         #region Constants
@@ -394,7 +392,6 @@ namespace RockWeb.Blocks.Groups
                     var schedule = scheduleService.Get( group.ScheduleId.Value );
                     if ( schedule != null && schedule.ScheduleType != ScheduleType.Named )
                     {
-
                         // Make sure this is the only group trying to use this schedule.
                         if ( !groupService.Queryable().Where( g => g.ScheduleId == schedule.Id && g.Id != group.Id ).Any() )
                         {
@@ -493,7 +490,6 @@ namespace RockWeb.Blocks.Groups
                     triggersUpdated = true;
                 }
             }
-
 
             List<GroupRequirement> groupRequirementsToInsert = new List<GroupRequirement>();
             // add/update any group requirements that were added or changed in the UI (we already removed the ones that were removed above)
@@ -712,7 +708,7 @@ namespace RockWeb.Blocks.Groups
 
                 if ( adding )
                 {
-                    // add ADMINISTRATE to the person who added the group 
+                    // add ADMINISTRATE to the person who added the group
                     Rock.Security.Authorization.AllowPerson( group, Authorization.ADMINISTRATE, this.CurrentPerson, rockContext );
                 }
 
@@ -917,7 +913,6 @@ namespace RockWeb.Blocks.Groups
                         }
 
                         attributeService.Add( newAttribute );
-
                     }
                     rockContext.SaveChanges();
 
@@ -937,7 +932,6 @@ namespace RockWeb.Blocks.Groups
                     }
                     rockContext.SaveChanges();
                     Rock.Security.Authorization.Flush();
-
                 } );
 
                 NavigateToCurrentPage( new Dictionary<string, string> { { "GroupId", newGroup.Id.ToString() } } );
@@ -1127,7 +1121,7 @@ namespace RockWeb.Blocks.Groups
                         // get all the allowed GroupTypes as defined by the parent group type
                         var allowedChildGroupTypesOfParentGroup = GetAllowedGroupTypes( parentGroup, rockContext ).ToList();
 
-                        // narrow it down to group types that the current user is allowed to edit 
+                        // narrow it down to group types that the current user is allowed to edit
                         var authorizedGroupTypes = new List<GroupType>();
                         foreach ( var allowedGroupType in allowedChildGroupTypesOfParentGroup )
                         {
@@ -1478,10 +1472,12 @@ namespace RockWeb.Blocks.Groups
                         case ScheduleType.Named:
                             spSchedule.SetValue( group.Schedule );
                             break;
+
                         case ScheduleType.Custom:
                             hfUniqueScheduleId.Value = group.Schedule.Id.ToString();
                             sbSchedule.iCalendarContent = group.Schedule.iCalendarContent;
                             break;
+
                         case ScheduleType.Weekly:
                             hfUniqueScheduleId.Value = group.Schedule.Id.ToString();
                             dowWeekly.SelectedDayOfWeek = group.Schedule.WeeklyDayOfWeek;
@@ -1903,12 +1899,15 @@ namespace RockWeb.Blocks.Groups
                 case "LOCATIONS":
                     dlgLocations.Show();
                     break;
+
                 case "GROUPMEMBERATTRIBUTES":
                     dlgGroupMemberAttribute.Show();
                     break;
+
                 case "GROUPREQUIREMENTS":
                     mdGroupRequirement.Show();
                     break;
+
                 case "MEMBERWORKFLOWTRIGGERS":
                     dlgMemberWorkflowTriggers.Show();
                     break;
@@ -1925,12 +1924,15 @@ namespace RockWeb.Blocks.Groups
                 case "LOCATIONS":
                     dlgLocations.Hide();
                     break;
+
                 case "GROUPMEMBERATTRIBUTES":
                     dlgGroupMemberAttribute.Hide();
                     break;
+
                 case "GROUPREQUIREMENTS":
                     mdGroupRequirement.Hide();
                     break;
+
                 case "MEMBERWORKFLOWTRIGGERS":
                     dlgMemberWorkflowTriggers.Hide();
                     break;
