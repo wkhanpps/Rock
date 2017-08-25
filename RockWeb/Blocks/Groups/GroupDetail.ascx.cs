@@ -54,6 +54,7 @@ namespace RockWeb.Blocks.Groups
     [BooleanField( "Show Copy Button", "Copies the group and all of its associated authorization rules", false, "", 10 )]
     [LinkedPage( "Group List Page", "The page to display related Group List.", false, "", "", 11 )]
     [LinkedPage( "Fundraising Progress Page", "The page to display fundraising progress for all its members.", false, "", "", 12 )]
+    [BooleanField( "Enable Dialog Mode", "When enabled, the Save and Cancel buttons will be associated with the buttons of the Modal.", false, "", 13 )]
     public partial class GroupDetail : RockBlock, IDetailBlock
     {
         #region Constants
@@ -229,6 +230,12 @@ namespace RockWeb.Blocks.Groups
             // this event gets fired after block settings are updated. it's nice to repaint the screen if these settings would alter it
             this.BlockUpdated += Block_BlockUpdated;
             this.AddConfigurationUpdateTrigger( upnlGroupDetail );
+
+            if ( GetAttributeValue( "EnableDialogMode" ).AsBoolean() && this.Page is DialogPage )
+            {
+                ( (DialogPage)this.Page ).OnSave += btnSave_Click;
+                pnlActions.Visible = false;
+            }
         }
 
         /// <summary>
@@ -788,11 +795,20 @@ namespace RockWeb.Blocks.Groups
                 GroupMemberWorkflowTriggerService.FlushCachedTriggers();
             }
 
-            var qryParams = new Dictionary<string, string>();
-            qryParams["GroupId"] = group.Id.ToString();
-            qryParams["ExpandedIds"] = PageParameter( "ExpandedIds" );
+            if ( !GetAttributeValue( "EnableDialogMode" ).AsBoolean() )
+            {
+                var qryParams = new Dictionary<string, string>();
+                qryParams["GroupId"] = group.Id.ToString();
+                qryParams["ExpandedIds"] = PageParameter( "ExpandedIds" );
 
-            NavigateToPage( RockPage.Guid, qryParams );
+                NavigateToPage( RockPage.Guid, qryParams );
+            }
+            else
+            {
+                lReadOnlyTitle.Text = group.Name.FormatAsHtmlTitle();
+                string script = "if (typeof window.parent.Rock.controls.modal.close === 'function') window.parent.Rock.controls.modal.close('Done');";
+                ScriptManager.RegisterStartupScript( this.Page, this.GetType(), "close-modal", script, true );
+            }
         }
 
         /// <summary>
@@ -1192,7 +1208,7 @@ namespace RockWeb.Blocks.Groups
             {
                 btnEdit.Visible = true;
                 btnDelete.Visible = !group.IsSystem;
-                if ( group.Id > 0 )
+                if ( group.Id > 0 && !GetAttributeValue( "EnableDialogMode" ).AsBoolean() )
                 {
                     ShowReadonlyDetails( group );
                 }
@@ -1207,6 +1223,7 @@ namespace RockWeb.Blocks.Groups
         /// Sets the highlight label visibility.
         /// </summary>
         /// <param name="group">The group.</param>
+        /// <param name="readOnly">if set to <c>true</c> [read only].</param>
         private void SetHighlightLabelVisibility( Group group, bool readOnly )
         {
             if ( readOnly )
