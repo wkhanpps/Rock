@@ -40,13 +40,13 @@ namespace RockWeb.Blocks.Cms
     /// <summary>
     /// 
     /// </summary>
-    [DisplayName("Content Channel Item Detail")]
-    [Category("CMS")]
-    [Description("Displays the details for a content channel item.")]
+    [DisplayName( "Content Channel Item Detail" )]
+    [Category( "CMS" )]
+    [Description( "Displays the details for a content channel item." )]
 
-    [LinkedPage( "Event Occurrence Page", order: 0, required:false )]
+    [LinkedPage( "Event Occurrence Page", order: 0, required: false )]
     [BooleanField( "Show Delete Button", "Shows a delete button for the current item.", false, order: 1 )]
-    [ContentChannelField("Content Channel", "If set the block will ignore content channel query parameters", false)]
+    [ContentChannelField( "Content Channel", "If set the block will ignore content channel query parameters", false )]
     public partial class ContentChannelItemDetail : RockBlock, IDetailBlock
     {
 
@@ -167,16 +167,22 @@ namespace RockWeb.Blocks.Cms
 
             if ( !Page.IsPostBack )
             {
-                if (string.IsNullOrWhiteSpace(GetAttributeValue("ContentChannel")))
+                ContentChannel contentChannel = null;
+                var rockContext = new RockContext();
+                if ( string.IsNullOrWhiteSpace( GetAttributeValue( "ContentChannel" ) ) )
                 {
-                    ShowDetail(PageParameter("contentItemId").AsInteger(), PageParameter("contentChannelId").AsIntegerOrNull());
+                    int? contentChannelId = PageParameter( "contentChannelId" ).AsIntegerOrNull();
+                    if ( contentChannelId.HasValue )
+                    {
+                        contentChannel = new ContentChannelService( rockContext ).Get( contentChannelId.Value );
+                    }
+                    ShowDetail( PageParameter( "contentItemId" ).AsInteger(), contentChannelId );
                 }
                 else
                 {
-                    var contentChannel = GetAttributeValue("ContentChannel").AsGuid();
-                    ShowDetail(PageParameter("contentItemId").AsInteger(), new ContentChannelService(new RockContext()).Get(GetAttributeValue("ContentChannel").AsGuid()).Id);
+                    contentChannel = new ContentChannelService( rockContext ).Get( GetAttributeValue( "ContentChannel" ).AsGuid() );
+                    ShowDetail( PageParameter( "contentItemId" ).AsInteger(), contentChannel.Id );
                 }
-                
             }
             else
             {
@@ -207,8 +213,8 @@ namespace RockWeb.Blocks.Cms
                 itemIds.Add( itemId.Value );
             }
 
-            foreach( var contentItemId in itemIds )
-            { 
+            foreach ( var contentItemId in itemIds )
+            {
                 ContentChannelItem contentItem = new ContentChannelItemService( new RockContext() ).Get( contentItemId );
                 if ( contentItem != null )
                 {
@@ -243,6 +249,7 @@ namespace RockWeb.Blocks.Cms
                 contentItem.Title = tbTitle.Text;
                 contentItem.Content = htmlContent.Text;
                 contentItem.Priority = nbPriority.Text.AsInteger();
+                
                 if ( contentItem.ContentChannelType.IncludeTime )
                 {
                     contentItem.StartDateTime = dtpStart.SelectedDateTime ?? RockDateTime.Now;
@@ -302,6 +309,9 @@ namespace RockWeb.Blocks.Cms
                 {
                     rockContext.SaveChanges();
                     contentItem.SaveAttributeValues( rockContext );
+                    // Save the tag selection
+                    taglTags.EntityGuid = contentItem.Guid;
+                    taglTags.SaveTagValues( CurrentPersonAlias );
 
                     int? eventItemOccurrenceId = PageParameter( "EventItemOccurrenceId" ).AsIntegerOrNull();
                     if ( eventItemOccurrenceId.HasValue )
@@ -311,7 +321,7 @@ namespace RockWeb.Blocks.Cms
                             .Queryable()
                             .Where( c =>
                                 c.ContentChannelItemId == contentItem.Id &&
-                                c.EventItemOccurrenceId == eventItemOccurrenceId.Value) 
+                                c.EventItemOccurrenceId == eventItemOccurrenceId.Value )
                             .FirstOrDefault();
 
                         if ( occurrenceChannelItem == null )
@@ -350,7 +360,7 @@ namespace RockWeb.Blocks.Cms
                     .FirstOrDefault( t => t.Id == contentItemId );
             }
 
-            if (contentItem != null )
+            if ( contentItem != null )
             {
                 contentItemService.Delete( contentItem );
                 rockContext.SaveChanges();
@@ -370,8 +380,7 @@ namespace RockWeb.Blocks.Cms
         }
 
         /// <summary>
-        /// Handles the BlockUpdated event of the control.
-        /// </summary>
+        /// Handles the BlockUpdated event of the control.        /// </summary>
         /// <param name="sender">The source of the event.</param>
         /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
         protected void Block_BlockUpdated( object sender, EventArgs e )
@@ -492,7 +501,7 @@ namespace RockWeb.Blocks.Cms
                     var service = new ContentChannelItemAssociationService( rockContext );
                     var order = service.Queryable().AsNoTracking()
                         .Where( a => a.ContentChannelItemId == ItemId.Value )
-                        .Select( a => (int?)a.Order )
+                        .Select( a => ( int? ) a.Order )
                         .DefaultIfEmpty()
                         .Max();
 
@@ -625,7 +634,7 @@ namespace RockWeb.Blocks.Cms
                     .FirstOrDefault( t => t.Id == contentItemId );
             }
 
-            if ( contentItem == null)
+            if ( contentItem == null )
             {
                 var contentChannel = new ContentChannelService( rockContext ).Get( hfChannelId.Value.AsInteger() );
                 if ( contentChannel != null )
@@ -643,12 +652,12 @@ namespace RockWeb.Blocks.Cms
                     if ( hierarchy.Any() )
                     {
                         var parentItem = contentItemService.Get( hierarchy.Last().AsInteger() );
-                        if ( parentItem != null && 
+                        if ( parentItem != null &&
                             parentItem.IsAuthorized( Authorization.EDIT, CurrentPerson ) &&
                             parentItem.ContentChannel.ChildContentChannels.Any( c => c.Id == contentChannel.Id ) )
                         {
                             var order = parentItem.ChildItems
-                                .Select( a => (int?)a.Order )
+                                .Select( a => ( int? ) a.Order )
                                 .DefaultIfEmpty()
                                 .Max();
 
@@ -694,12 +703,31 @@ namespace RockWeb.Blocks.Cms
 
             ContentChannelItem contentItem = GetContentItem();
 
+            taglTags.EntityTypeId = EntityTypeCache.Read( typeof( ContentChannelItem ) ).Id;
+            taglTags.AllowNewTags = false;
+            taglTags.DelaySave = true;
+            if ( contentItem.ContentChannel != null && !string.IsNullOrEmpty( contentItem.ContentChannel.ItemTagCategories ) )
+            {
+                var categoryIds = contentItem.ContentChannel.ItemTagCategories.Split( ',' ).AsIntegerList();
+                var categoryGuids = new CategoryService( new RockContext() )
+                                .GetByIds( categoryIds )
+                                .Select( a => a.Guid )
+                                .ToList();
+                taglTags.CategoryIds = categoryGuids;
+            }
+            else
+            {
+                taglTags.CategoryIds = new List<Guid>() { Guid.Empty };
+            }
+            taglTags.EntityGuid = contentItem.Guid;
+            taglTags.GetTagValues( CurrentPersonId );
+
             pdAuditDetails.SetEntity( contentItem, ResolveRockUrl( "~" ) );
 
             if ( contentItem != null &&
                 contentItem.ContentChannelType != null &&
                 contentItem.ContentChannel != null &&
-                ( canEdit || contentItem.IsAuthorized( Authorization.EDIT, CurrentPerson ) ) ) 
+                ( canEdit || contentItem.IsAuthorized( Authorization.EDIT, CurrentPerson ) ) )
             {
                 hfIsDirty.Value = "false";
 
@@ -708,7 +736,7 @@ namespace RockWeb.Blocks.Cms
                 pnlEditDetails.Visible = true;
 
                 // show/hide the delete button
-                lbDelete.Visible = (GetAttributeValue( "ShowDeleteButton" ).AsBoolean() && contentItem.Id != 0);
+                lbDelete.Visible = ( GetAttributeValue( "ShowDeleteButton" ).AsBoolean() && contentItem.Id != 0 );
 
                 hfId.Value = contentItem.Id.ToString();
                 hfChannelId.Value = contentItem.ContentChannelId.ToString();
@@ -732,12 +760,20 @@ namespace RockWeb.Blocks.Cms
                 hlStatus.Text = contentItem.Status.ConvertToString();
 
                 hlStatus.LabelType = LabelType.Default;
-                switch( contentItem.Status )
+                switch ( contentItem.Status )
                 {
-                    case ContentChannelItemStatus.Approved: hlStatus.LabelType = LabelType.Success; break;
-                    case ContentChannelItemStatus.Denied: hlStatus.LabelType = LabelType.Danger; break;
-                    case ContentChannelItemStatus.PendingApproval: hlStatus.LabelType = LabelType.Warning; break;
-                    default: hlStatus.LabelType = LabelType.Default; break;
+                    case ContentChannelItemStatus.Approved:
+                        hlStatus.LabelType = LabelType.Success;
+                        break;
+                    case ContentChannelItemStatus.Denied:
+                        hlStatus.LabelType = LabelType.Danger;
+                        break;
+                    case ContentChannelItemStatus.PendingApproval:
+                        hlStatus.LabelType = LabelType.Warning;
+                        break;
+                    default:
+                        hlStatus.LabelType = LabelType.Default;
+                        break;
                 }
 
                 var statusDetail = new System.Text.StringBuilder();
@@ -791,7 +827,7 @@ namespace RockWeb.Blocks.Cms
 
                     dpStart.SelectedDate = contentItem.StartDateTime.Date;
                     dpStart.Label = contentItem.ContentChannelType.DateRangeType == ContentChannelDateType.DateRange ? "Start" : "Active";
-                    dpExpire.SelectedDate = contentItem.ExpireDateTime.HasValue ? contentItem.ExpireDateTime.Value.Date : (DateTime?)null;
+                    dpExpire.SelectedDate = contentItem.ExpireDateTime.HasValue ? contentItem.ExpireDateTime.Value.Date : ( DateTime? ) null;
                 }
 
                 nbPriority.Text = contentItem.Priority.ToString();
@@ -887,7 +923,7 @@ namespace RockWeb.Blocks.Cms
             hierarchy.Add( hfId.Value );
 
             var newHierarchy = new List<string>();
-            foreach( string existingItemId in hierarchy )
+            foreach ( string existingItemId in hierarchy )
             {
                 if ( existingItemId != itemId )
                 {
@@ -909,7 +945,7 @@ namespace RockWeb.Blocks.Cms
         /// </summary>
         private void ReturnToParentPage()
         {
-            var qryParams = new Dictionary<string,string>();
+            var qryParams = new Dictionary<string, string>();
 
             int? eventItemOccurrenceId = PageParameter( "EventItemOccurrenceId" ).AsIntegerOrNull();
             if ( eventItemOccurrenceId.HasValue )
@@ -992,9 +1028,9 @@ namespace RockWeb.Blocks.Cms
                 i.Guid,
                 i.Title,
                 i.StartDateTime,
-                ExpireDateTime = i.ContentChannelType.DateRangeType == ContentChannelDateType.DateRange ? i.ExpireDateTime : (DateTime?)null,
-                Priority = i.ContentChannelType.DisablePriority ? (int?)null : (int?)i.Priority,
-                Status = (i.ContentChannel.RequiresApproval && !i.ContentChannelType.DisableStatus) ? DisplayStatus( i.Status ) : string.Empty,
+                ExpireDateTime = i.ContentChannelType.DateRangeType == ContentChannelDateType.DateRange ? i.ExpireDateTime : ( DateTime? ) null,
+                Priority = i.ContentChannelType.DisablePriority ? ( int? ) null : ( int? ) i.Priority,
+                Status = ( i.ContentChannel.RequiresApproval && !i.ContentChannelType.DisableStatus ) ? DisplayStatus( i.Status ) : string.Empty,
                 CreatedBy = i.CreatedByPersonAlias != null && i.CreatedByPersonAlias.Person != null ? i.CreatedByPersonAlias.Person.NickName + " " + i.CreatedByPersonAlias.Person.LastName : ""
             } ).ToList();
 
@@ -1023,10 +1059,10 @@ namespace RockWeb.Blocks.Cms
                 i.Id,
                 i.Guid,
                 i.Title,
-                StartDateTime = i.ContentChannelType.DateRangeType != ContentChannelDateType.NoDates ? i.StartDateTime : (DateTime?)null,
-                ExpireDateTime = i.ContentChannelType.DateRangeType == ContentChannelDateType.DateRange ? i.ExpireDateTime : (DateTime?)null,
-                Priority = i.ContentChannelType.DisablePriority ? (int?)null : (int?)i.Priority,
-                Status = (i.ContentChannel.RequiresApproval && !i.ContentChannelType.DisableStatus) ? DisplayStatus( i.Status ) : string.Empty,
+                StartDateTime = i.ContentChannelType.DateRangeType != ContentChannelDateType.NoDates ? i.StartDateTime : ( DateTime? ) null,
+                ExpireDateTime = i.ContentChannelType.DateRangeType == ContentChannelDateType.DateRange ? i.ExpireDateTime : ( DateTime? ) null,
+                Priority = i.ContentChannelType.DisablePriority ? ( int? ) null : ( int? ) i.Priority,
+                Status = ( i.ContentChannel.RequiresApproval && !i.ContentChannelType.DisableStatus ) ? DisplayStatus( i.Status ) : string.Empty,
                 CreatedBy = i.CreatedByPersonAlias != null && i.CreatedByPersonAlias.Person != null ? i.CreatedByPersonAlias.Person.NickName + " " + i.CreatedByPersonAlias.Person.LastName : ""
             } ).ToList();
             gParentItems.DataBind();

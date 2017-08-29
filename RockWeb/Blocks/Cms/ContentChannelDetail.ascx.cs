@@ -39,9 +39,9 @@ namespace RockWeb.Blocks.Cms
     /// <summary>
     /// 
     /// </summary>
-    [DisplayName("Content Channel Detail")]
-    [Category("CMS")]
-    [Description("Displays the details for a content channel.")]
+    [DisplayName( "Content Channel Detail" )]
+    [Category( "CMS" )]
+    [Description( "Displays the details for a content channel." )]
     public partial class ContentChannelDetail : RockBlock, IDetailBlock
     {
 
@@ -104,7 +104,7 @@ namespace RockWeb.Blocks.Cms
             gItemAttributes.GridReorder += gItemAttributes_GridReorder;
 
             btnSecurity.EntityTypeId = EntityTypeCache.Read( typeof( Rock.Model.ContentChannel ) ).Id;
-            
+
             // this event gets fired after block settings are updated. it's nice to repaint the screen if these settings would alter it
             this.BlockUpdated += Block_BlockUpdated;
             this.AddConfigurationUpdateTrigger( upnlContent );
@@ -112,6 +112,10 @@ namespace RockWeb.Blocks.Cms
             string script = @"
     $('.js-content-channel-enable-rss').change( function() {
         $(this).closest('div.form-group').siblings('div.js-content-channel-rss').slideToggle()
+    });
+
+    $('.js-content-channel-enable-tags').change( function() {
+        $(this).closest('div.form-group').siblings('div.js-content-channel-tags').slideToggle()
     });
 ";
             ScriptManager.RegisterStartupScript( cbEnableRss, cbEnableRss.GetType(), "enable-rss", script, true );
@@ -130,8 +134,8 @@ namespace RockWeb.Blocks.Cms
 
             if ( !Page.IsPostBack )
             {
-                int? contentChannelId = PageParameter( "contentChannelId" ).AsIntegerOrNull( );
-                if( contentChannelId.HasValue )
+                int? contentChannelId = PageParameter( "contentChannelId" ).AsIntegerOrNull();
+                if ( contentChannelId.HasValue )
                 {
                     upnlContent.Visible = true;
                     ShowDetail( contentChannelId.Value );
@@ -234,15 +238,15 @@ namespace RockWeb.Blocks.Cms
             if ( contentChannelId != 0 )
             {
                 channel = GetContentChannel( hfId.ValueAsInt() );
-                if (channel != null && 
-                    channel.ContentChannelTypeId.ToString() != ddlChannelType.SelectedValue && 
+                if ( channel != null &&
+                    channel.ContentChannelTypeId.ToString() != ddlChannelType.SelectedValue &&
                     channel.Items.Any() )
                 {
                     maContentChannelWarning.Show( "Changing the content type will result in all of this channel's items losing any data that is specific to the original content type!", ModalAlertType.Warning );
                 }
             }
 
-            if (channel == null)
+            if ( channel == null )
             {
                 channel = new ContentChannel();
             }
@@ -274,9 +278,13 @@ namespace RockWeb.Blocks.Cms
         /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
         protected void ddlContentControlType_SelectedIndexChanged( object sender, EventArgs e )
         {
+
+
+
+
             tbRootImageDirectory.Visible = ddlContentControlType.SelectedValueAsEnumOrNull<ContentControlType>() == ContentControlType.HtmlEditor;
         }
-        
+
         /// <summary>
         /// Handles the Click event of the lbSave control.
         /// </summary>
@@ -290,7 +298,7 @@ namespace RockWeb.Blocks.Cms
             ContentChannelService contentChannelService = new ContentChannelService( rockContext );
 
             int contentChannelId = hfId.Value.AsInteger();
-             
+
             if ( contentChannelId == 0 )
             {
                 contentChannel = new ContentChannel { Id = 0 };
@@ -320,6 +328,7 @@ namespace RockWeb.Blocks.Cms
                 contentChannel.ItemUrl = tbItemUrl.Text;
                 contentChannel.TimeToLive = nbTimetoLive.Text.AsIntegerOrNull();
                 contentChannel.ItemUrl = tbContentChannelItemPublishingPoint.Text;
+                contentChannel.ItemTagCategories = cbEnableTag.Checked ? string.Join( ",", cpCategory.SelectedValues ) : string.Empty;
 
                 contentChannel.ChildContentChannels = new List<ContentChannel>();
                 contentChannel.ChildContentChannels.Clear();
@@ -346,12 +355,12 @@ namespace RockWeb.Blocks.Cms
                     rockContext.SaveChanges();
                     contentChannel.SaveAttributeValues( rockContext );
 
-                    foreach( var item in new ContentChannelItemService( rockContext )
+                    foreach ( var item in new ContentChannelItemService( rockContext )
                         .Queryable()
-                        .Where( i => 
+                        .Where( i =>
                             i.ContentChannelId == contentChannel.Id &&
-                            i.ContentChannelTypeId != contentChannel.ContentChannelTypeId 
-                        ))
+                            i.ContentChannelTypeId != contentChannel.ContentChannelTypeId
+                        ) )
                     {
                         item.ContentChannelTypeId = contentChannel.ContentChannelTypeId;
                     }
@@ -425,7 +434,7 @@ namespace RockWeb.Blocks.Cms
         /// <param name="e">The <see cref="RowEventArgs" /> instance containing the event data.</param>
         protected void gItemAttributes_Edit( object sender, RowEventArgs e )
         {
-            Guid attributeGuid = (Guid)e.RowKeyValue;
+            Guid attributeGuid = ( Guid ) e.RowKeyValue;
             gItemAttributes_ShowEdit( attributeGuid );
         }
 
@@ -499,7 +508,7 @@ namespace RockWeb.Blocks.Cms
         /// <exception cref="System.NotImplementedException"></exception>
         protected void gItemAttributes_Delete( object sender, RowEventArgs e )
         {
-            Guid attributeGuid = (Guid)e.RowKeyValue;
+            Guid attributeGuid = ( Guid ) e.RowKeyValue;
             ItemAttributesState.RemoveEntity( attributeGuid );
 
             BindItemAttributesGrid();
@@ -739,8 +748,13 @@ namespace RockWeb.Blocks.Cms
                 cbChildItemsManuallyOrdered.Checked = contentChannel.ChildItemsManuallyOrdered;
                 cbEnableRss.Checked = contentChannel.EnableRss;
                 tbContentChannelItemPublishingPoint.Text = contentChannel.ItemUrl;
-
+                cbEnableTag.Checked = !string.IsNullOrEmpty( contentChannel.ItemTagCategories );
                 divRss.Attributes["style"] = cbEnableRss.Checked ? "display:block" : "display:none";
+                divTag.Attributes["style"] = cbEnableTag.Checked ? "display:block" : "display:none";
+                if ( !string.IsNullOrEmpty( contentChannel.ItemTagCategories ) )
+                {
+                    cpCategory.SetValues( contentChannel.ItemTagCategories.Split( ',' ).AsIntegerList() );
+                }
                 tbChannelUrl.Text = contentChannel.ChannelUrl;
                 tbItemUrl.Text = contentChannel.ItemUrl;
                 nbTimetoLive.Text = ( contentChannel.TimeToLive ?? 0 ).ToString();
@@ -795,11 +809,11 @@ namespace RockWeb.Blocks.Cms
         private void SetHeadingInfo( ContentChannel contentChannel, string title )
         {
             string cssIcon = contentChannel.IconCssClass;
-            if (string.IsNullOrWhiteSpace(cssIcon))
+            if ( string.IsNullOrWhiteSpace( cssIcon ) )
             {
                 cssIcon = "fa fa-bullhorn";
             }
-            lIcon.Text = string.Format("<i class='{0}'></i>", cssIcon);
+            lIcon.Text = string.Format( "<i class='{0}'></i>", cssIcon );
             lTitle.Text = title.FormatAsHtmlTitle();
             hlContentChannel.Text = contentChannel.ContentChannelType != null ? contentChannel.ContentChannelType.Name : string.Empty;
         }

@@ -9,7 +9,7 @@
 <asp:UpdatePanel ID="upnlContent" runat="server">
     <ContentTemplate>
 
-        <asp:Panel ID="pnlDetails" CssClass="panel panel-block" runat="server" >
+        <asp:Panel ID="pnlDetails" CssClass="panel panel-block" runat="server">
 
             <asp:HiddenField ID="hfId" runat="server" />
             <asp:HiddenField ID="hfTypeId" runat="server" />
@@ -36,7 +36,7 @@
 
                     <div class="row">
                         <div class="col-md-6">
-                        <Rock:DataTextBox ID="tbName" runat="server" SourceTypeName="Rock.Model.ContentChannel, Rock" PropertyName="Name" />
+                            <Rock:DataTextBox ID="tbName" runat="server" SourceTypeName="Rock.Model.ContentChannel, Rock" PropertyName="Name" />
                         </div>
                         <div class="col-md-6">
                         </div>
@@ -80,13 +80,17 @@
                         </div>
                         <div class="col-md-6">
                             <Rock:DataTextBox ID="tbIconCssClass" runat="server" Label="Icon CSS Class" SourceTypeName="Rock.Model.ContentChannel, Rock" PropertyName="IconCssClass" />
-                            <Rock:DynamicPlaceHolder ID="phAttributes" runat="server" />
+                            <Rock:DynamicPlaceholder ID="phAttributes" runat="server" />
                             <Rock:RockCheckBox ID="cbEnableRss" runat="server" Label="Enable RSS" Text="Yes" CssClass="js-content-channel-enable-rss" />
-                            <div id="divRss" runat="server" class="js-content-channel-rss"> 
+                            <div id="divRss" runat="server" class="js-content-channel-rss">
                                 <Rock:DataTextBox ID="tbChannelUrl" runat="server" Label="Channel Url" SourceTypeName="Rock.Model.ContentChannel, Rock" PropertyName="ChannelUrl" />
                                 <Rock:DataTextBox ID="tbItemUrl" runat="server" Label="Item Url" SourceTypeName="Rock.Model.ContentChannel, Rock" PropertyName="ItemUrl" />
-                                <Rock:NumberBox ID="nbTimetoLive" runat="server" Label="Time to Live (TTL)" NumberType="Integer" MinimumValue="0" 
-                                    Help="The number of minutes a feed can stay cached before it is refreshed from the source."/>
+                                <Rock:NumberBox ID="nbTimetoLive" runat="server" Label="Time to Live (TTL)" NumberType="Integer" MinimumValue="0"
+                                    Help="The number of minutes a feed can stay cached before it is refreshed from the source." />
+                            </div>
+                            <Rock:RockCheckBox ID="cbEnableTag" runat="server" Label="Enable Tagging" CssClass="js-content-channel-enable-tags" />
+                            <div id="divTag" runat="server" class="js-content-channel-tags">
+                                <Rock:CategoryPicker ID="cpCategory" runat="server"  AllowMultiSelect="true" EntityTypeName="Rock.Model.Tag" Label="Tag Categories" />
                             </div>
                         </div>
                     </div>
@@ -113,7 +117,7 @@
 
                 </div>
 
-                <fieldset id="fieldsetViewSummary" runat="server" >
+                <fieldset id="fieldsetViewSummary" runat="server">
                     <p class="description">
                         <asp:Literal ID="lGroupDescription" runat="server"></asp:Literal>
                     </p>
@@ -126,7 +130,7 @@
                             <asp:Literal ID="lDetailsRight" runat="server" />
                         </div>
                     </div>
-                    
+
                     <div class="actions">
                         <asp:LinkButton ID="lbEdit" runat="server" Text="Edit" CssClass="btn btn-primary" CausesValidation="false" OnClick="lbEdit_Click" />
                         <Rock:SecurityButton ID="btnSecurity" runat="server" class="btn btn-sm btn-security pull-right" />
@@ -137,7 +141,7 @@
             </div>
 
         </asp:Panel>
-        
+
         <Rock:ModalAlert ID="modalAlert" runat="server" />
 
         <asp:HiddenField ID="hfActiveDialog" runat="server" />
@@ -148,7 +152,7 @@
             </Content>
         </Rock:ModalDialog>
 
-        <Rock:ModalDialog ID="dlgItemAttributes" runat="server" Title="Content Item Attributes" OnSaveClick="dlgItemAttributes_SaveClick"  OnCancelScript="clearActiveDialog();" ValidationGroup="ItemAttributes">
+        <Rock:ModalDialog ID="dlgItemAttributes" runat="server" Title="Content Item Attributes" OnSaveClick="dlgItemAttributes_SaveClick" OnCancelScript="clearActiveDialog();" ValidationGroup="ItemAttributes">
             <Content>
                 <Rock:AttributeEditor ID="edtItemAttributes" runat="server" ShowActions="false" ValidationGroup="ItemAttributes" />
             </Content>
