@@ -309,6 +309,10 @@
     <Compile Include="Migrations\201708232210021_Communications2d.Designer.cs">
       <DependentUpon>201708232210021_Communications2d.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\201709051921465_Communications2e.cs" />
+    <Compile Include="Migrations\201709051921465_Communications2e.Designer.cs">
+      <DependentUpon>201709051921465_Communications2e.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\RockMigrationSQL.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -2689,6 +2693,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\201708232210021_Communications2d.resx">
       <DependentUpon>201708232210021_Communications2d.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201709051921465_Communications2e.resx">
+      <DependentUpon>201709051921465_Communications2e.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\Version 6.0\Version 1.6.0\201609282147388_WaitList.resx">
       <DependentUpon>201609282147388_WaitList.cs</DependentUpon>
